@@ -24,6 +24,16 @@ variable "github_repo" {
   type        = string
 }
 
+variable "github_branch" {
+  description = "Name of the GitHub Branch"
+  type        = string
+}
+
+variable "source_repository_url" {
+  description = "Source Repository URL"
+  type        = string
+}
+
 variable "codebuild_project_name" {
   description = "Name of the CodeBuild project"
   type        = string
@@ -48,5 +58,9 @@ variable "tags" {
 
 variable "codestar_connection_arn" {
   description = "ARN of github connection"
+  type        = string
+}
+variable "ec2_tag_name" {
+  description = "Name of EC2"
   type        = string
 }

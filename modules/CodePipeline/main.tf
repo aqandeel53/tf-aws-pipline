@@ -1,4 +1,24 @@
-# Create CodePipeline
+##############################################################################################################
+#
+#
+#
+#
+#
+#                           CodePipeline Configuration
+#
+# Creates a CodePipeline with:
+# - Pipeline name and role ARN from variables
+# - Artifact store configured with S3 bucket
+# - Source stage using CodeStarSourceConnection with GitHub configuration
+# - Build stage using CodeBuild with input and output artifacts
+# - Deploy stage using CodeDeploy with deployment configuration
+# - Tags from variable
+#
+#
+#
+#
+##############################################################################################################
+
 resource "aws_codepipeline" "pipeline" {
   name     = var.pipeline_name
   role_arn = var.pipeline_role_arn

@@ -1,3 +1,25 @@
+##############################################################################################################
+#
+#
+#
+#
+#
+#                           Terraform Resources and Modules Configuration
+#
+# Defines an S3 bucket and multiple Terraform modules for IAM roles, CodeBuild, CodeDeploy, and CodePipeline:
+# - S3 Bucket: Creates a bucket for storing pipeline artifacts with specified tags.
+# - IAM Module: Defines IAM roles for CodePipeline, CodeBuild, and CodeDeploy.
+# - CodeBuild Module: Configures a CodeBuild project with environment variables and tags.
+# - CodeDeploy Module: Configures a CodeDeploy application and deployment group with specified tags.
+# - CodePipeline Module: Sets up a CodePipeline with specified configuration and sources.
+#
+#
+#
+#
+##############################################################################################################
+
+
+# Create S3 Bucket
 resource "aws_s3_bucket" "b" {
   bucket = "my-tf-test-bucket-124245"
 
@@ -7,12 +29,7 @@ resource "aws_s3_bucket" "b" {
   }
 }
 
-# # S3 Bucket ACL Resource
-# resource "aws_s3_bucket_acl" "b_acl" {
-#   bucket = aws_s3_bucket.b.id
-#   acl    = "private"
-# }
-
+# IAM Module
 module "iam" {
   source                 = "./modules/IamRoles"
   codepipeline_role_name = "codepipeline-role-1"
@@ -25,7 +42,7 @@ module "codebuild" {
   source                = "./modules/CodeBuild"
   project_name          = "my-nodejs-app-build"
   service_role_arn      = module.iam.codebuild_role_arn
-  source_repository_url = "https://github.com/aqandeel53/Nodet" #++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+  source_repository_url = var.source_repository_url
   environment_variables = [
     {
       name  = "NODE_ENV"
@@ -45,7 +62,7 @@ module "codedeploy" {
   application_name      = "my-nodejs-app-deploy"
   deployment_group_name = "my-nodejs-app-deployment-group"
   service_role_arn      = module.iam.codedeploy_role_arn
-  ec2_tag_name          = "node-server" #++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+  ec2_tag_name          = var.ec2_tag_name
   tags = {
     Environment = "Production"
   }
@@ -59,9 +76,9 @@ module "codepipeline" {
   pipeline_name                    = "my-nodejs-app-pipeline"
   pipeline_role_arn                = module.iam.codepipeline_role_arn
   artifact_bucket                  = aws_s3_bucket.b.bucket
-  github_owner                     = "aqandeel53"       # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-  github_repo                      = "aqandeel53/Nodet" # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-  github_branch                    = "tf"
+  github_owner                     = var.github_owner
+  github_repo                      = var.github_repo
+  github_branch                    = var.github_branch
   codestar_connection_arn          = var.codestar_connection_arn
   codebuild_project_name           = module.codebuild.project_name
   codedeploy_application_name      = module.codedeploy.application_name

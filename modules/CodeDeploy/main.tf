@@ -1,3 +1,20 @@
+##############################################################################################################
+#
+#
+#
+#
+#
+#                           CodeDeploy Configuration
+#
+# Creates a CodeDeploy application and deployment group with:
+# - Application name from variable
+# - Tags from variable
+#
+#
+#
+#
+##############################################################################################################
+
 # Create CodeDeploy Application
 resource "aws_codedeploy_app" "app" {
   name             = var.application_name
@@ -24,13 +41,6 @@ resource "aws_codedeploy_deployment_group" "deployment_group" {
     enabled = true
     events  = ["DEPLOYMENT_FAILURE"]
   }
-
-  # Remove this block to disable load balancer configuration
-  # load_balancer_info {
-  #   elb_info {
-  #     name = var.elb_name
-  #   }
-  # }
 
   tags = var.tags
 }

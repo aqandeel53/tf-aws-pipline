@@ -1,3 +1,24 @@
+##############################################################################################################
+#
+#
+#
+#
+#
+#                           IAM Roles and Policies for CodePipeline, CodeBuild, and CodeDeploy
+#
+# Defines IAM roles and policies for:
+# - CodePipeline: Role with policy allowing access to S3, CodeBuild, CodeDeploy, and CodeStar Connections
+# - CodeBuild: Role with policy allowing access to S3, EC2, and CloudWatch Logs
+# - CodeDeploy: Role with AWS managed policy for CodeDeploy
+# Policies attached to respective roles
+#
+#
+#
+#
+##############################################################################################################
+
+
+
 # Define the IAM Role for CodePipeline
 resource "aws_iam_role" "codepipeline_role" {
   name = var.codepipeline_role_name
