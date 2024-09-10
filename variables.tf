@@ -4,15 +4,15 @@ variable "pipeline_name" {
   type        = string
 }
 
-variable "pipeline_role_arn" {
-  description = "IAM Role ARN for CodePipeline"
-  type        = string
-}
+# variable "pipeline_role_arn" {
+#   description = "IAM Role ARN for CodePipeline"
+#   type        = string
+# }
 
-variable "artifact_bucket" {
-  description = "S3 bucket for storing artifacts"
-  type        = string
-}
+# variable "artifact_bucket" {
+#   description = "S3 bucket for storing artifacts"
+#   type        = string
+# }
 
 variable "github_owner" {
   description = "Owner of the GitHub repository"

@@ -47,7 +47,6 @@ resource "aws_codepipeline" "pipeline" {
       }
     }
   }
-
   stage {
     name = "Build"
 
@@ -67,6 +66,22 @@ resource "aws_codepipeline" "pipeline" {
   }
 
   stage {
+    name = "Approval"
+
+    action {
+      name     = "ManualApproval"
+      category = "Approval"
+      owner    = "AWS"
+      provider = "Manual"
+      version  = "1"
+
+      # Optional: Add comments or notification if required
+      configuration = {
+        CustomData = "Manual approval required before deploying"
+      }
+    }
+  }
+  stage {
     name = "Deploy"
 
     action {
@@ -83,6 +98,7 @@ resource "aws_codepipeline" "pipeline" {
       }
     }
   }
+
 
   tags = var.tags
 }
