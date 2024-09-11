@@ -88,3 +88,167 @@ module "codepipeline" {
   }
 }
 
+
+
+
+
+#################################################################################################################
+
+# SNS Topic for Notifications
+resource "aws_sns_topic" "pipeline_notifications" {
+  name = "pipeline-notifications"
+}
+
+# SNS Subscription for Email Notifications
+resource "aws_sns_topic_subscription" "email_subscription" {
+  topic_arn = aws_sns_topic.pipeline_notifications.arn
+  protocol  = "email"
+  endpoint  = "aqandeel53@gmail.com"
+}
+
+
+# failer
+#################################################################################################################
+
+# CloudWatch Event Rule for Pipeline Failure
+resource "aws_cloudwatch_event_rule" "pipeline_failure_rule" {
+  name        = "pipeline-failure-rule"
+  description = "Triggers on pipeline failures"
+
+  event_pattern = jsonencode({
+    detail = {
+      pipeline = ["my-nodejs-app-pipeline"],
+      state    = ["FAILED"]
+    },
+    "detail-type" = ["CodePipeline Pipeline Execution State Change"],
+    source        = ["aws.codepipeline"],
+    resources     = ["arn:aws:codepipeline:eu-north-1:816069125111:my-nodejs-app-pipeline"]
+  })
+}
+
+
+# CloudWatch Event Target for SNS Notification
+resource "aws_cloudwatch_event_target" "pipeline_failure_target" {
+  rule = aws_cloudwatch_event_rule.pipeline_failure_rule.name
+  arn  = aws_sns_topic.pipeline_notifications.arn
+}
+
+
+
+# seccess
+#################################################################################################################
+
+# CloudWatch Event Rule for Pipeline Success
+resource "aws_cloudwatch_event_rule" "pipeline_success_rule" {
+  name        = "pipeline-success-rule"
+  description = "Triggers on pipeline successes"
+
+  event_pattern = jsonencode({
+    detail = {
+      pipeline = ["my-nodejs-app-pipeline"],
+      state    = ["SUCCEEDED"]
+    },
+    "detail-type" = ["CodePipeline Pipeline Execution State Change"],
+    source        = ["aws.codepipeline"],
+    resources     = ["arn:aws:codepipeline:eu-north-1:816069125111:my-nodejs-app-pipeline"]
+  })
+}
+
+
+# CloudWatch Event Target for CodePipeline
+resource "aws_cloudwatch_event_target" "pipeline_success_target" {
+  rule     = aws_cloudwatch_event_rule.pipeline_success_rule.name
+  arn      = "arn:aws:codepipeline:eu-north-1:816069125111:Node-pipeline"
+  role_arn = aws_iam_role.cloudwatch_events_role.arn
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#roles
+#####################################################################################
+
+
+
+
+# IAM Role Policy for CloudWatch to SNS
+resource "aws_iam_role_policy" "cloudwatch_sns_policy" {
+  name = "cloudwatch-sns-policy"
+  role = aws_iam_role.cloudwatch_role.id
+
+  policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Action   = "sns:Publish",
+        Effect   = "Allow",
+        Resource = aws_sns_topic.pipeline_notifications.arn
+      }
+    ]
+  })
+}
+
+# IAM Role for CloudWatch Events
+resource "aws_iam_role" "cloudwatch_role" {
+  name = "cloudwatch-role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Effect = "Allow",
+        Principal = {
+          Service = "events.amazonaws.com"
+        },
+        Action = "sts:AssumeRole"
+      }
+    ]
+  })
+}
+
+# IAM Role for CloudWatch Events to invoke CodePipeline
+resource "aws_iam_role" "cloudwatch_events_role" {
+  name = "cloudwatch-events-role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Effect = "Allow",
+        Principal = {
+          Service = "events.amazonaws.com"
+        },
+        Action = "sts:AssumeRole"
+      }
+    ]
+  })
+}
+
+
+
+# IAM Role Policy for CloudWatch Events to invoke CodePipeline
+resource "aws_iam_role_policy" "cloudwatch_events_policy" {
+  name = "cloudwatch-events-policy"
+  role = aws_iam_role.cloudwatch_events_role.id
+
+  policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Action   = "codepipeline:StartPipelineExecution",
+        Effect   = "Allow",
+        Resource = "arn:aws:codepipeline:eu-north-1:816069125111:Node-pipeline"
+      }
+    ]
+  })
+}
